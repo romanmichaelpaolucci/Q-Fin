@@ -80,3 +80,15 @@ class MonteCarloBinaryPut:
 
     def __init__(self, strike, payout, n, r, S, mu, sigma, dt, T):
         self.price = self.simulate_price(strike, payout, n, r, S, mu, sigma, dt, T)
+
+
+class MonteCarloBarrierCall:
+
+    def __init__(self):
+        pass
+
+
+class MonteCarloBarrierPut:
+
+    def __init__(self):
+        pass
