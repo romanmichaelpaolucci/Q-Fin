@@ -2,18 +2,6 @@ import math
 from scipy.stats import norm
 
 
-class MonteCarloCall:
-
-    def __init__():
-        pass
-
-
-class MonteCarloPut:
-
-    def ___init__():
-        pass
-
-
 class BlackScholesCall:
 
     def call_delta(
