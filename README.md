@@ -80,7 +80,7 @@ Put theta:  -5.363140560324083
 # Simulation Pricing
 
 ### <a href="https://medium.com/swlh/python-for-pricing-exotics-3a2bfab5ff66"> Exotic Options </a>
-Simulation pricing for exotic options is available under the assumptions of Geometric Brownian motion.
+Simulation pricing for exotic options is available under the assumptions associated with Geometric Brownian motion.
 
 #### Binary Options
 ```Python
