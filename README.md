@@ -11,8 +11,8 @@ A mathematical finance Python library
 Theoretical options pricing for non-dividend paying stocks is available via the BlackScholesCall and BlackScholesPut classes.
 
 ```Python
-# 100 - initial asset price
-# .3 - asset volatility
+# 100 - initial underlying asset price
+# .3 - asset underlying volatility
 # 100 - option strike price
 # 1 - time to maturity (annum)
 # .01 - risk free rate of interest
@@ -77,6 +77,33 @@ Call theta:  -6.35319039407325
 Put theta:  -5.363140560324083
 ```
 
-# Exotics Pricing
+# Simulation Pricing
 
+### <a href="https://medium.com/swlh/python-for-pricing-exotics-3a2bfab5ff66"> Exotic Options </a>
+Simulation pricing for exotic options is available under the assumptions of Geometric Brownian motion.
+
+#### Binary Options
+```Python
+# 100 - strike price
+# 50 - binary option payout
+# 1000 - number of simulated price paths
+# .01 - risk free rate of interest
+# 100 - initial underlying asset price
+# 0 - underlying asset drift (mu)
+# .3 - underlying asset volatility 
+# 1/52 - time steps (dt)
+# 1 - time to maturity (annum)
+binary_call = MonteCarloBinaryCall(100, 50, 1000, .01, 100, 0, .3, 1/52, 1)
+binary_put = MonteCarloBinaryPut(100, 50, 1000, .01, 100, 0, .3, 1/52, 1)
+```
+
+```Python
+print(binary_call.price)
+print(binary_put.price)
+```
+
+```
+22.42462873441866
+27.869902820039087
+```
 # Futures Pricing
