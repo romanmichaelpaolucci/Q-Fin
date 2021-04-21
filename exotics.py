@@ -20,14 +20,34 @@ class GeometricBrownianMotion:
 
 class MonteCarloCall:
 
-    def __init__(self):
-        pass
+    def simulate_price(self, strike, n, r, S, mu, sigma, dt, T):
+        payouts = []
+        for i in range(0, n):
+            GBM = GeometricBrownianMotion(S, mu, sigma, dt, T)
+            if(GBM.simulated_path[-1] >= strike):
+                payouts.append((GBM.simulated_path[-1]-strike)*np.exp(-r*T))
+            else:
+                payouts.append(0)
+        return np.average(payouts)
+
+    def __init__(self, strike, n, r, S, mu, sigma, dt, T):
+        self.price = self.simulate_price(strike, n, r,  S, mu, sigma, dt, T)
 
 
 class MonteCarloPut:
 
-    def __init__(self):
-        pass
+    def simulate_price(self, strike, n, r, S, mu, sigma, dt, T):
+        payouts = []
+        for i in range(0, n):
+            GBM = GeometricBrownianMotion(S, mu, sigma, dt, T)
+            if(GBM.simulated_path[-1] <= strike):
+                payouts.append((strike - GBM.simulated_path[-1])*np.exp(-r*T))
+            else:
+                payouts.append(0)
+        return np.average(payouts)
+
+    def __init__(self, strike, n, r, S, mu, sigma, dt, T):
+        self.price = self.simulate_price(strike, n, r,  S, mu, sigma, dt, T)
 
 
 class MonteCarloBinaryCall:
@@ -41,7 +61,6 @@ class MonteCarloBinaryCall:
             else:
                 payouts.append(0)
         return np.average(payouts)
-
 
     def __init__(self, strike, payout, n, r, S, mu, sigma, dt, T):
         self.price = self.simulate_price(strike, payout, n, r,  S, mu, sigma, dt, T)
@@ -58,7 +77,6 @@ class MonteCarloBinaryPut:
             else:
                 payouts.append(0)
         return np.average(payouts)
-
 
     def __init__(self, strike, payout, n, r, S, mu, sigma, dt, T):
         self.price = self.simulate_price(strike, payout, n, r, S, mu, sigma, dt, T)
