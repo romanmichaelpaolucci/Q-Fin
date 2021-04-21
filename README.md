@@ -77,4 +77,6 @@ Call theta:  -6.35319039407325
 Put theta:  -5.363140560324083
 ```
 
+# Exotics Pricing
+
 # Futures Pricing
