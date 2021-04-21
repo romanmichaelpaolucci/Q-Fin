@@ -1,6 +1,11 @@
 # Q-Fin
 A mathematical finance Python library
 
+## Installation
+```
+pip install qfin
+```
+
 # Time Value of Money
 
 # Bond Pricing
