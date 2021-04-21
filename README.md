@@ -2,6 +2,7 @@
 A mathematical finance Python library
 
 ## Installation
+https://pypi.org/project/QFin/
 ```
 pip install qfin
 ```
