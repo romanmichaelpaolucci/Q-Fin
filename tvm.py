@@ -1,10 +1,10 @@
-class annuity:
+class Annuity:
 
     def __init__():
         pass
 
 
-class perpetuity:
+class Perpetuity:
 
     def __init__():
         pass
