@@ -5,7 +5,7 @@ this_directory = path.abspath(path.dirname(__file__))
 with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
-VERSION = '0.0.11'
+VERSION = '0.0.14'
 DESCRIPTION = 'A Python package for mathematical finance.'
 
 # Setting up
