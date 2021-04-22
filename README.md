@@ -17,6 +17,8 @@ pip install qfin
 Theoretical options pricing for non-dividend paying stocks is available via the BlackScholesCall and BlackScholesPut classes.
 
 ```Python
+from qfin.options import BlackScholesCall
+from qfin.options import BlackScholesPut
 # 100 - initial underlying asset price
 # .3 - asset underlying volatility
 # 100 - option strike price
@@ -88,8 +90,36 @@ Put theta:  -5.363140560324083
 ### <a href="https://medium.com/swlh/python-for-pricing-exotics-3a2bfab5ff66"> Exotic Options </a>
 Simulation pricing for exotic options is available under the assumptions associated with Geometric Brownian motion.
 
+#### Vanilla Options
+```Python
+from qfin.simulations import MonteCarloCall
+from qfin.simulations import MonteCarloPut
+# 100 - strike price
+# 1000 - number of simulated price paths
+# .01 - risk free rate of interest
+# 100 - initial underlying asset price
+# 0 - underlying asset drift (mu)
+# .3 - underlying asset volatility
+# 1/52 - time steps (dt)
+# 1 - time to maturity (annum)
+call_option = MonteCarloCall(100, 1000, .01, 100, 0, .3, 1/52, 1)
+put_option = MonteCarloCall(100, 1000, .01, 100, 0, .3, 1/52, 1)
+```
+
+```Python
+print(call_option.price)
+print(put_option.price)
+```
+
+```
+12.73812121792851
+12.304109267761028
+```
+
 #### Binary Options
 ```Python
+from qfin.simulations import MonteCarloBinaryCall
+from qfin.simulations import MonteCarloBinaryPut
 # 100 - strike price
 # 50 - binary option payout
 # 1000 - number of simulated price paths
