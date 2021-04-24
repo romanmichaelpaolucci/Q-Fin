@@ -122,16 +122,3 @@ class MonteCarloBarrierPut:
 
     def __init__(self):
         pass
-
-# 100 - initial underlying asset price
-# 0 - underlying asset drift (mu)
-# .01 - risk free rate of interest
-# .05 - continuous dividend
-# .5, 2 - (alpha, beta) mean reverting parameters
-# -.7 - (rho) correlation of errors generated
-# .3 - Variance's volatility
-# 1/52 - time steps (dt)
-# 1 - time to maturity (annum)
-svm = StochasticVarianceModel(100, 0, .01, .05, .5, 2, -.7, .3, .09, 1/52, 1)
-
-print(svm.simulated_path)
