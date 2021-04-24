@@ -50,7 +50,7 @@ class StochasticVarianceModel:
 
 class MonteCarloCall:
 
-    def simulate_price(self, strike, n, r, S, mu, sigma, dt, T):
+    def simulate_price_gbm(self, strike, n, r, S, mu, sigma, dt, T):
         payouts = []
         for i in range(0, n):
             GBM = GeometricBrownianMotion(S, mu, sigma, dt, T)
@@ -60,29 +60,57 @@ class MonteCarloCall:
                 payouts.append(0)
         return np.average(payouts)
 
-    def __init__(self, strike, n, r, S, mu, sigma, dt, T):
-        self.price = self.simulate_price(strike, n, r,  S, mu, sigma, dt, T)
-
-
-class MonteCarloPut:
-
-    def simulate_price(self, strike, n, r, S, mu, sigma, dt, T):
+    def simulate_price_svm(self, strike, n, S, mu, r, div, alpha, beta, rho, vol_var, inst_var, dt, T):
         payouts = []
         for i in range(0, n):
-            GBM = GeometricBrownianMotion(S, mu, sigma, dt, T)
-            if(GBM.simulated_path[-1] <= strike):
-                payouts.append((strike - GBM.simulated_path[-1])*np.exp(-r*T))
+            SVM = StochasticVarianceModel(S, mu, r, div, alpha, beta, rho, vol_var, inst_var, dt, T)
+            if(SVM.simulated_path[-1] >= strike):
+                payouts.append((SVM.simulated_path[-1]-strike)*np.exp(-r*T))
             else:
                 payouts.append(0)
         return np.average(payouts)
 
-    def __init__(self, strike, n, r, S, mu, sigma, dt, T):
-        self.price = self.simulate_price(strike, n, r,  S, mu, sigma, dt, T)
+    def __init__(self, strike, n, r, S, mu, sigma, dt, T, alpha=None, beta=None, rho=None, div=None, vol_var=None):
+        if alpha is None:
+            self.price = self.simulate_price_gbm(strike, n, r, S, mu, sigma, dt, T)
+        else:
+            inst_var = np.sqrt(sigma)
+            self.price = self.simulate_price_svm(strike, n, S, mu, r, div, alpha, beta, rho, vol_var, inst_var, dt, T)
+
+
+class MonteCarloPut:
+
+    def simulate_price_gbm(self, strike, n, r, S, mu, sigma, dt, T):
+        payouts = []
+        for i in range(0, n):
+            GBM = GeometricBrownianMotion(S, mu, sigma, dt, T)
+            if(GBM.simulated_path[-1] <= strike):
+                payouts.append((strike-GBM.simulated_path[-1])*np.exp(-r*T))
+            else:
+                payouts.append(0)
+        return np.average(payouts)
+
+    def simulate_price_svm(self, strike, n, S, mu, r, div, alpha, beta, rho, vol_var, inst_var, dt, T):
+        payouts = []
+        for i in range(0, n):
+            SVM = StochasticVarianceModel(S, mu, r, div, alpha, beta, rho, vol_var, inst_var, dt, T)
+            if(SVM.simulated_path[-1] <= strike):
+                payouts.append((strike-SVM.simulated_path[-1])*np.exp(-r*T))
+            else:
+                payouts.append(0)
+        return np.average(payouts)
+
+    def __init__(self, strike, n, r, S, mu, sigma, dt, T, alpha=None, beta=None, rho=None, div=None, vol_var=None):
+        if alpha is None:
+            self.price = self.simulate_price_gbm(strike, n, r, S, mu, sigma, dt, T)
+        else:
+            inst_var = np.sqrt(sigma)
+            self.price = self.simulate_price_svm(strike, n, S, mu, r, div, alpha, beta, rho, vol_var, inst_var, dt, T)
 
 
 class MonteCarloBinaryCall:
 
-    def simulate_price(self, strike, payout, n, r, S, mu, sigma, dt, T):
+    def simulate_price_gbm(self, strike, n, payout, r, S, mu, sigma, dt, T):
         payouts = []
         for i in range(0, n):
             GBM = GeometricBrownianMotion(S, mu, sigma, dt, T)
@@ -92,13 +120,27 @@ class MonteCarloBinaryCall:
                 payouts.append(0)
         return np.average(payouts)
 
-    def __init__(self, strike, payout, n, r, S, mu, sigma, dt, T):
-        self.price = self.simulate_price(strike, payout, n, r,  S, mu, sigma, dt, T)
+    def simulate_price_svm(self, strike, n, payout, S, mu, r, div, alpha, beta, rho, vol_var, inst_var, dt, T):
+        payouts = []
+        for i in range(0, n):
+            SVM = StochasticVarianceModel(S, mu, r, div, alpha, beta, rho, vol_var, inst_var, dt, T)
+            if(SVM.simulated_path[-1] >= strike):
+                payouts.append(payout*np.exp(-r*T))
+            else:
+                payouts.append(0)
+        return np.average(payouts)
+
+    def __init__(self, strike, n, payout, r, S, mu, sigma, dt, T, alpha=None, beta=None, rho=None, div=None, vol_var=None):
+        if alpha is None:
+            self.price = self.simulate_price_gbm(strike, n, payout, r, S, mu, sigma, dt, T)
+        else:
+            inst_var = np.sqrt(sigma)
+            self.price = self.simulate_price_svm(strike, n, payout, S, mu, r, div, alpha, beta, rho, vol_var, inst_var, dt, T)
 
 
 class MonteCarloBinaryPut:
 
-    def simulate_price(self, strike, payout, n, r, S, mu, sigma, dt, T):
+    def simulate_price_gbm(self, strike, n, payout, r, S, mu, sigma, dt, T):
         payouts = []
         for i in range(0, n):
             GBM = GeometricBrownianMotion(S, mu, sigma, dt, T)
@@ -108,8 +150,22 @@ class MonteCarloBinaryPut:
                 payouts.append(0)
         return np.average(payouts)
 
-    def __init__(self, strike, payout, n, r, S, mu, sigma, dt, T):
-        self.price = self.simulate_price(strike, payout, n, r, S, mu, sigma, dt, T)
+    def simulate_price_svm(self, strike, n, payout, S, mu, r, div, alpha, beta, rho, vol_var, inst_var, dt, T):
+        payouts = []
+        for i in range(0, n):
+            SVM = StochasticVarianceModel(S, mu, r, div, alpha, beta, rho, vol_var, inst_var, dt, T)
+            if(SVM.simulated_path[-1] <= strike):
+                payouts.append(payout*np.exp(-r*T))
+            else:
+                payouts.append(0)
+        return np.average(payouts)
+
+    def __init__(self, strike, n, payout, r, S, mu, sigma, dt, T, alpha=None, beta=None, rho=None, div=None, vol_var=None):
+        if alpha is None:
+            self.price = self.simulate_price_gbm(strike, n, payout, r, S, mu, sigma, dt, T)
+        else:
+            inst_var = np.sqrt(sigma)
+            self.price = self.simulate_price_svm(strike, n, payout, S, mu, r, div, alpha, beta, rho, vol_var, inst_var, dt, T)
 
 
 class MonteCarloBarrierCall:
