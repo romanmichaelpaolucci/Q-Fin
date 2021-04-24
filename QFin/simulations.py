@@ -33,7 +33,7 @@ class StochasticVarianceModel:
 
             price_now = price_now + (r - div) * price_now * dt + price_now * np.sqrt(prev_inst_var * dt) * e1
             prev_inst_var = inst_var_now
-            inst_var_now = prev_inst_var + (alpha - beta*prev_inst_var)*dt + vol_var*np.sqrt(prev_inst_var*dt)*e2
+            inst_var_now = prev_inst_var + alpha*(beta - prev_inst_var)*dt + vol_var*np.sqrt(prev_inst_var*dt)*e2
 
             # Avoid negative cases and floor variance at zero
             if inst_var_now > .0000001:
