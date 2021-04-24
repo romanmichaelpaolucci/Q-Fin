@@ -117,7 +117,7 @@ from qfin.simulations import StochasticVarianceModel
 # .01 - risk free rate of interest
 # .05 - continuous dividend
 # .5, 2 - (alpha, beta) mean reverting parameters
-# -.7 - (rho) correlation of errors generated
+# -.7 - (rho) correlation of motion generated
 # .3 - Variance's volatility
 # 1/52 - time steps (dt)
 # 1 - time to maturity (annum)
@@ -135,7 +135,7 @@ print(svm.simulated_path)
 # Simulation Pricing
 
 ### <a href="https://medium.com/swlh/python-for-pricing-exotics-3a2bfab5ff66"> Exotic Options </a>
-Simulation pricing for exotic options is available under the assumptions associated with the respective stochastic processes.
+Simulation pricing for exotic options is available under the assumptions associated with the respective stochastic processes.  Geometric Brownian motion is the base underlying stochastic process used in each Monte Carlo simulation.  However, should additional parameters be provided, the appropriate stochastic process will be used to generate each sample path.
 
 #### Vanilla Options
 ```Python
@@ -150,7 +150,12 @@ from qfin.simulations import MonteCarloPut
 # 1/52 - time steps (dt)
 # 1 - time to maturity (annum)
 call_option = MonteCarloCall(100, 1000, .01, 100, 0, .3, 1/52, 1)
-put_option = MonteCarloCall(100, 1000, .01, 100, 0, .3, 1/52, 1)
+# These additional parameters will generate a Monte Carlo price based on a stochastic volatility process
+# .5, 2 - (alpha, beta) mean reverting parameters
+# -.5 - (rho) correlation of motion generated
+# .02 - continuous dividend
+# .3 - Variance's volatility
+put_option = MonteCarloPut(100, 1000, .01, 100, 0, .3, 1/52, 1, .5, 2, -.5, .02, .3)
 ```
 
 ```Python
@@ -160,7 +165,7 @@ print(put_option.price)
 
 ```
 12.73812121792851
-12.304109267761028
+23.195814963576286
 ```
 
 #### Binary Options
