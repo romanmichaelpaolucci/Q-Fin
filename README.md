@@ -116,12 +116,13 @@ from qfin.simulations import StochasticVarianceModel
 # 0 - underlying asset drift (mu)
 # .01 - risk free rate of interest
 # .05 - continuous dividend
-# .5, 2 - (alpha, beta) mean reverting parameters
-# -.7 - (rho) correlation of motion generated
+# 2 - rate in which variance reverts to the implied long run variance
+# .25 - implied long run variance as time tends to infinity
+# -.7 - correlation of motion generated
 # .3 - Variance's volatility
 # 1/52 - time steps (dt)
 # 1 - time to maturity (annum)
-svm = StochasticVarianceModel(100, 0, .01, .05, .5, 2, -.7, .3, .09, 1/52, 1)
+svm = StochasticVarianceModel(100, 0, .01, .05, 2, .25, -.7, .3, .09, 1/52, 1)
 ```
 
 ```Python
@@ -151,11 +152,12 @@ from qfin.simulations import MonteCarloPut
 # 1 - time to maturity (annum)
 call_option = MonteCarloCall(100, 1000, .01, 100, 0, .3, 1/52, 1)
 # These additional parameters will generate a Monte Carlo price based on a stochastic volatility process
-# .5, 2 - (alpha, beta) mean reverting parameters
-# -.5 - (rho) correlation of motion generated
+# 2 - rate in which variance reverts to the implied long run variance
+# .25 - implied long run variance as time tends to infinity
+# -.5 - correlation of motion generated
 # .02 - continuous dividend
 # .3 - Variance's volatility
-put_option = MonteCarloPut(100, 1000, .01, 100, 0, .3, 1/52, 1, .5, 2, -.5, .02, .3)
+put_option = MonteCarloPut(100, 1000, .01, 100, 0, .3, 1/52, 1, 2, .25, -.5, .02, .3)
 ```
 
 ```Python
