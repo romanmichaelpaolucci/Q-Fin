@@ -1,5 +1,5 @@
 # Q-Fin
-A mathematical finance Python library
+A Python library for mathematical finance.
 
 ## Installation
 https://pypi.org/project/QFin/
