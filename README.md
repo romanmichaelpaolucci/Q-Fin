@@ -196,4 +196,60 @@ print(binary_put.price)
 22.42462873441866
 27.869902820039087
 ```
+
+#### Barrier Options
+```Python
+from qfin.simulations import MonteCarloBarrierCall
+from qfin.simulations import MonteCarloBarrierPut
+# 100 - strike price
+# 50 - binary option payout
+# 1000 - number of simulated price paths
+# .01 - risk free rate of interest
+# 100 - initial underlying asset price
+# 0 - underlying asset drift (mu)
+# .3 - underlying asset volatility
+# 1/52 - time steps (dt)
+# 1 - time to maturity (annum)
+# True/False - Barrier is Up or Down
+# True/False - Barrier is In or Out
+barrier_call = MonteCarloBarrierCall(100, 1000, 150, .01, 100, 0, .3, 1/52, 1, up=True, out=True)
+barrier_put = MonteCarloBarrierCall(100, 1000, 95, .01, 100, 0, .3, 1/52, 1, up=False, out=False)
+```
+
+```Python
+print(binary_call.price)
+print(binary_put.price)
+```
+
+```
+4.895841997908933
+5.565856754630819
+```
+
+#### Asian Options
+```Python
+# 100 - strike price
+# 1000 - number of simulated price paths
+# .01 - risk free rate of interest
+# 100 - initial underlying asset price
+# 0 - underlying asset drift (mu)
+# .3 - underlying asset volatility
+# 1/52 - time steps (dt)
+# 1 - time to maturity (annum)
+asian_call = MonteCarloAsianCall(100, 1000, .01, 100, 0, .3, 1/52, 1)
+asian_put = MonteCarloAsianPut(100, 1000, .01, 100, 0, .3, 1/52, 1)
+```
+
+```Python
+print(asian_call.price)
+print(asian_put.price)
+```
+
+```
+6.688201154529573
+7.123274528125894
+```
+
+
+
 # Futures Pricing
