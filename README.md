@@ -7,8 +7,6 @@ https://pypi.org/project/QFin/
 pip install qfin
 ```
 
-# Time Value of Money
-
 # Bond Pricing
 
 # Option Pricing
