@@ -228,6 +228,8 @@ print(binary_put.price)
 
 #### Asian Options
 ```Python
+from qfin.simulations import MonteCarloAsianCall
+from qfin.simulations import MonteCarloAsianPut
 # 100 - strike price
 # 1000 - number of simulated price paths
 # .01 - risk free rate of interest
@@ -250,6 +252,32 @@ print(asian_put.price)
 7.123274528125894
 ```
 
+#### Extendible Options
+```Python
+from qfin.simulations import MonteCarloExtendibleCall
+from qfin.simulations import MontecarloExtendiblePut
+# 100 - strike price
+# 1000 - number of simulated price paths
+# .01 - risk free rate of interest
+# 100 - initial underlying asset price
+# 0 - underlying asset drift (mu)
+# .3 - underlying asset volatility
+# 1/52 - time steps (dt)
+# 1 - time to maturity (annum)
+# .5 - extension if out of the money at expiration
+extendible_call = MonteCarloExtendibleCall(100, 1000, .01, 100, 0, .3, 1/52, 1, .5)
+extendible_put = MonteCarloExtendiblePut(100, 1000, .01, 100, 0, .3, 1/52, 1, .5)
+```
+
+```Python
+print(extendible_call.price)
+print(extendible_put.price)
+```
+
+```
+13.60274931789973
+13.20330578685724
+```
 
 
 # Futures Pricing
