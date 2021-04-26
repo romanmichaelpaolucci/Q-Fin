@@ -438,18 +438,3 @@ class MonteCarloExtendiblePut:
         else:
             inst_var = np.sqrt(sigma)
             self.price = self.simulate_price_svm(strike, n, S, mu, r, div, alpha, beta, rho, vol_var, inst_var, dt, T, extension)
-
-# 100 - strike price
-# 1000 - number of simulated price paths
-# .01 - risk free rate of interest
-# 100 - initial underlying asset price
-# 0 - underlying asset drift (mu)
-# .3 - underlying asset volatility
-# 1/52 - time steps (dt)
-# 1 - time to maturity (annum)
-# .5 - extension if out of the money at expiration
-extendible_call = MonteCarloExtendibleCall(100, 1000, .01, 100, 0, .3, 1/52, 1, .5)
-extendible_put = MonteCarloExtendiblePut(100, 1000, .01, 100, 0, .3, 1/52, 1, .5)
-
-print(extendible_call.price)
-print(extendible_put.price)

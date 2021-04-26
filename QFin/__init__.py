@@ -10,3 +10,5 @@ from qfin.simulations import MonteCarloBarrierCall
 from qfin.simulations import MonteCarloBarrierPut
 from qfin.simulations import MonteCarloAsianCall
 from qfin.simulations import MonteCarloAsianPut
+from qfin.simulations import MonteCarloExtendibleCall
+from qfin.simulations import MonteCarloExtendiblePut
