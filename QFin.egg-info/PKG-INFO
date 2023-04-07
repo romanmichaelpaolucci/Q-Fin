@@ -1,0 +1,361 @@
+Metadata-Version: 2.1
+Name: QFin
+Version: 0.1.21
+Summary: A Python library for mathematical finance.
+Home-page: UNKNOWN
+Author: Roman Paolucci
+Author-email: <romanmichaelpaolucci@gmail.com>
+License: MIT
+Description: # Q-Fin
+        A Python library for mathematical finance.
+        
+        ## Installation
+        https://pypi.org/project/QFin/
+        ```
+        pip install qfin
+        ```
+        
+        # Version '0.1.20'
+        QFin is being reconstructed to leverage more principals of object-oriented programming.  Several modules in this version are deprecated along with the solutions to PDEs/SDEs (mainly in the options module).
+        
+        QFin now contains a module called 'stochastics' which will be largely responsible for model calibration and option pricing.  A Cython/C++ equivalent to QFin is also being constructed so stay tuned! 
+        
+        # Option Pricing <i>(>= 0.1.20)</i>
+        
+        Stochastic differential equations that model underlying asset dynamics extend the 'StochasticModel' class and posses a list of model parameters and functions for pricing vanillas, calibrating to implied volatility surfaces, and Monte Carlo simulations (particularly useful after calibration for pricing path dependent options).
+        
+        Below is a trivial example using ArithmeticBrownianMotion - first import the StochasticModel...
+        ```Python
+        from qfin.stochastics import ArithmeticBrownianMotion
+        ```
+        Next initialize the class object by parameterizing the model...
+        ```Python
+        # abm parameterized by Bachelier vol = .3
+        abm = ArithmeticBrownianMotion([.3])
+        ```
+        The abm may now be used to price a vanilla call/put option (prices default to "CALL") under the given parameter set...
+        ```Python
+        # F0 = 101
+        # X = 100
+        # T = 1
+        abm.vanilla_pricing(101, 100, 1, "CALL")
+        # Call Price: 1.0000336233656906
+        ```
+        Using call-put parity put prices may also be obtained...
+        ```Python
+        # F0 = 99
+        # X = 100
+        # T = 1
+        abm.vanilla_pricing(99, 100, 1, "PUT")
+        # Put Price: 1.0000336233656952
+        ```
+        Calibration and subsequent simulation of the process is also available - do note that some processes have a static volatility and can't be calibrated to an ivol surface.
+        
+        The arithmetic Brownian motion may be simulated as follows...
+        
+        ```Python
+        # F0 = 100
+        # n (steps) = 10000
+        # dt = 1/252
+        # T = 1
+        abm.simulate(100, 10000, 1/252, 1)
+        ```
+        Results of the simulation along with the simulation characteristics are stored under the tuple 'path_characteristics' : (paths, n, dt, T).  
+        
+        Using the stored path characteristics we may find the price of a call just as before by averaging each discounted path payoff (assuming a stock process) with zero-rates we can avoid discounting as follows and find the option value as follows...
+        
+        ```Python
+        # list of path payoffs
+        payoffs = []
+        # option strike price
+        X = 99
+        
+        # iteration through terminal path values to identify payoff
+        for path in abm.path_characteristics[0]:
+            # appending CALL payoff
+            payoffs.append(max((path[-1] - X), 0))
+        
+        # option value today
+        np.average(payoffs)
+        
+        # Call Price:  1.0008974837343871
+        ```
+        We can see here that the simulated price is converging to the price in close-form.
+        
+        # Option Pricing <i>(deprecated <= 0.0.20) </i>
+        
+        ### <a href="https://medium.com/swlh/deriving-the-black-scholes-model-5e518c65d0bc"> Black-Scholes Pricing</a>
+        Theoretical options pricing for non-dividend paying stocks is available via the BlackScholesCall and BlackScholesPut classes.
+        
+        ```Python
+        from qfin.options import BlackScholesCall
+        from qfin.options import BlackScholesPut
+        # 100 - initial underlying asset price
+        # .3 - asset underlying volatility
+        # 100 - option strike price
+        # 1 - time to maturity (annum)
+        # .01 - risk free rate of interest
+        euro_call = BlackScholesCall(100, .3, 100, 1, .01)
+        euro_put = BlackScholesPut(100, .3, 100, 1, .01)
+        ```
+        
+        ```Python
+        print('Call price: ', euro_call.price)
+        print('Put price: ', euro_put.price)
+        ```
+        
+        ```
+        Call price:  12.361726191532611
+        Put price:  11.366709566449416
+        ```
+        
+        ### Option Greeks
+        First-order and some second-order partial derivatives of the Black-Scholes pricing model are available.
+        
+        #### Delta
+        First-order partial derivative with respect to the underlying asset price.
+        ```Python
+        print('Call delta: ', euro_call.delta)
+        print('Put delta: ', euro_put.delta)
+        ```
+        ```
+        Call delta:  0.5596176923702425
+        Put delta:  -0.4403823076297575
+        ```
+        
+        #### Gamma
+        Second-order partial derivative with respect to the underlying asset price.
+        ```Python
+        print('Call gamma: ', euro_call.gamma)
+        print('Put gamma: ', euro_put.gamma)
+        ```
+        ```
+        Call gamma:  0.018653923079008084
+        Put gamma:  0.018653923079008084
+        ```
+        
+        #### Vega
+        First-order partial derivative with respect to the underlying asset volatility.
+        ```Python
+        print('Call vega: ', euro_call.vega)
+        print('Put vega: ', euro_put.vega)
+        ```
+        ```
+        Call vega:  39.447933090788894
+        Put vega:  39.447933090788894
+        ```
+        
+        #### Theta
+        First-order partial derivative with respect to the time to maturity.
+        ```Python
+        print('Call theta: ', euro_call.theta)
+        print('Put theta: ', euro_put.theta)
+        ```
+        ```
+        Call theta:  -6.35319039407325
+        Put theta:  -5.363140560324083
+        ```
+        
+        # Stochastic Processes
+        Simulating asset paths is available using common stochastic processes.
+        
+        ### <a href="https://towardsdatascience.com/geometric-brownian-motion-559e25382a55"> Geometric Brownian Motion </a>
+        Standard model for implementing geometric Brownian motion.
+        ```Python
+        from qfin.simulations import GeometricBrownianMotion
+        # 100 - initial underlying asset price
+        # 0 - underlying asset drift (mu)
+        # .3 - underlying asset volatility
+        # 1/52 - time steps (dt)
+        # 1 - time to maturity (annum)
+        gbm = GeometricBrownianMotion(100, 0, .3, 1/52, 1)
+        ```
+        
+        ```Python
+        print(gbm.simulated_path)
+        ```
+        
+        ```
+        [107.0025048205179, 104.82320056538235, 102.53591127422398, 100.20213816642244, 102.04283245358256, 97.75115579923988, 95.19613943526382, 96.9876745495834, 97.46055174410736, 103.93032659279226, 107.36331603194304, 108.95104494118915, 112.42823319947456, 109.06981862825943, 109.10124426285238, 114.71465058375804, 120.00234814086286, 116.91730159923688, 118.67452601825876, 117.89233466917202, 118.93541257993591, 124.36106523035058, 121.26088015675688, 120.53641952983601, 113.73881043255554, 114.91724168548876, 112.94192281337791, 113.55773877160591, 107.49491796151044, 108.0715118831013, 113.01893111071472, 110.39204535739405, 108.63917240906524, 105.8520395233433, 116.2907247951675, 114.07340779267213, 111.06821275009212, 109.65530380775077, 105.78971667172465, 97.75385009989282, 97.84501925249452, 101.90695475825825, 106.0493833583297, 105.48266575656817, 106.62375752876223, 112.39829297429974, 111.22855058562658, 109.89796974828265, 112.78068777325248, 117.80550869036715, 118.4680557054793, 114.33258212280838]
+        ```
+        
+        ### <a href="https://towardsdatascience.com/stochastic-volatility-pricing-in-python-931f4b03d793"> Stochastic Variance Process </a>
+        Stochastic volatility model based on Heston's paper (1993).
+        ```Python
+        from qfin.simulations import StochasticVarianceModel
+        # 100 - initial underlying asset price
+        # 0 - underlying asset drift (mu)
+        # .01 - risk free rate of interest
+        # .05 - continuous dividend
+        # 2 - rate in which variance reverts to the implied long run variance
+        # .25 - implied long run variance as time tends to infinity
+        # -.7 - correlation of motion generated
+        # .3 - Variance's volatility
+        # 1/52 - time steps (dt)
+        # 1 - time to maturity (annum)
+        svm = StochasticVarianceModel(100, 0, .01, .05, 2, .25, -.7, .3, .09, 1/52, 1)
+        ```
+        
+        ```Python
+        print(svm.simulated_path)
+        ```
+        
+        ```
+        [98.21311553503577, 100.4491317019877, 89.78475515902066, 89.0169762497475, 90.70468848525869, 86.00821802256675, 80.74984494892573, 89.05033807013137, 88.51410029337134, 78.69736798230346, 81.90948751054125, 83.02502248913251, 83.46375102829755, 85.39018282900138, 78.97401642238059, 78.93505221741903, 81.33268688455111, 85.12156706038515, 79.6351983987908, 84.2375291273571, 82.80206517176038, 89.63659376223292, 89.22438477640516, 89.13899271995662, 94.60123239511816, 91.200165507022, 96.0578905115345, 87.45399399599378, 97.908745925816, 97.93068975065052, 103.32091104292813, 110.58066464778392, 105.21520242908348, 99.4655106985056, 106.74882010453683, 112.0058519886151, 110.20930861932342, 105.11835510815085, 113.59852610881678, 107.13315204738092, 108.36549026977205, 113.49809943785571, 122.67910031073885, 137.70966794451425, 146.13877267735612, 132.9973784430374, 129.75750117504984, 128.7467891695649, 127.13115959080305, 130.47967713110302, 129.84273088908265, 129.6411527208744]
+        ```
+        
+        # Simulation Pricing
+        
+        ### <a href="https://medium.com/swlh/python-for-pricing-exotics-3a2bfab5ff66"> Exotic Options </a>
+        Simulation pricing for exotic options is available under the assumptions associated with the respective stochastic processes.  Geometric Brownian motion is the base underlying stochastic process used in each Monte Carlo simulation.  However, should additional parameters be provided, the appropriate stochastic process will be used to generate each sample path.
+        
+        #### Vanilla Options
+        ```Python
+        from qfin.simulations import MonteCarloCall
+        from qfin.simulations import MonteCarloPut
+        # 100 - strike price
+        # 1000 - number of simulated price paths
+        # .01 - risk free rate of interest
+        # 100 - initial underlying asset price
+        # 0 - underlying asset drift (mu)
+        # .3 - underlying asset volatility
+        # 1/52 - time steps (dt)
+        # 1 - time to maturity (annum)
+        call_option = MonteCarloCall(100, 1000, .01, 100, 0, .3, 1/52, 1)
+        # These additional parameters will generate a Monte Carlo price based on a stochastic volatility process
+        # 2 - rate in which variance reverts to the implied long run variance
+        # .25 - implied long run variance as time tends to infinity
+        # -.5 - correlation of motion generated
+        # .02 - continuous dividend
+        # .3 - Variance's volatility
+        put_option = MonteCarloPut(100, 1000, .01, 100, 0, .3, 1/52, 1, 2, .25, -.5, .02, .3)
+        ```
+        
+        ```Python
+        print(call_option.price)
+        print(put_option.price)
+        ```
+        
+        ```
+        12.73812121792851
+        23.195814963576286
+        ```
+        
+        #### Binary Options
+        ```Python
+        from qfin.simulations import MonteCarloBinaryCall
+        from qfin.simulations import MonteCarloBinaryPut
+        # 100 - strike price
+        # 50 - binary option payout
+        # 1000 - number of simulated price paths
+        # .01 - risk free rate of interest
+        # 100 - initial underlying asset price
+        # 0 - underlying asset drift (mu)
+        # .3 - underlying asset volatility 
+        # 1/52 - time steps (dt)
+        # 1 - time to maturity (annum)
+        binary_call = MonteCarloBinaryCall(100, 50, 1000, .01, 100, 0, .3, 1/52, 1)
+        binary_put = MonteCarloBinaryPut(100, 50, 1000, .01, 100, 0, .3, 1/52, 1)
+        ```
+        
+        ```Python
+        print(binary_call.price)
+        print(binary_put.price)
+        ```
+        
+        ```
+        22.42462873441866
+        27.869902820039087
+        ```
+        
+        #### Barrier Options
+        ```Python
+        from qfin.simulations import MonteCarloBarrierCall
+        from qfin.simulations import MonteCarloBarrierPut
+        # 100 - strike price
+        # 50 - binary option payout
+        # 1000 - number of simulated price paths
+        # .01 - risk free rate of interest
+        # 100 - initial underlying asset price
+        # 0 - underlying asset drift (mu)
+        # .3 - underlying asset volatility
+        # 1/52 - time steps (dt)
+        # 1 - time to maturity (annum)
+        # True/False - Barrier is Up or Down
+        # True/False - Barrier is In or Out
+        barrier_call = MonteCarloBarrierCall(100, 1000, 150, .01, 100, 0, .3, 1/52, 1, up=True, out=True)
+        barrier_put = MonteCarloBarrierCall(100, 1000, 95, .01, 100, 0, .3, 1/52, 1, up=False, out=False)
+        ```
+        
+        ```Python
+        print(binary_call.price)
+        print(binary_put.price)
+        ```
+        
+        ```
+        4.895841997908933
+        5.565856754630819
+        ```
+        
+        #### Asian Options
+        ```Python
+        from qfin.simulations import MonteCarloAsianCall
+        from qfin.simulations import MonteCarloAsianPut
+        # 100 - strike price
+        # 1000 - number of simulated price paths
+        # .01 - risk free rate of interest
+        # 100 - initial underlying asset price
+        # 0 - underlying asset drift (mu)
+        # .3 - underlying asset volatility
+        # 1/52 - time steps (dt)
+        # 1 - time to maturity (annum)
+        asian_call = MonteCarloAsianCall(100, 1000, .01, 100, 0, .3, 1/52, 1)
+        asian_put = MonteCarloAsianPut(100, 1000, .01, 100, 0, .3, 1/52, 1)
+        ```
+        
+        ```Python
+        print(asian_call.price)
+        print(asian_put.price)
+        ```
+        
+        ```
+        6.688201154529573
+        7.123274528125894
+        ```
+        
+        #### Extendible Options
+        ```Python
+        from qfin.simulations import MonteCarloExtendibleCall
+        from qfin.simulations import MontecarloExtendiblePut
+        # 100 - strike price
+        # 1000 - number of simulated price paths
+        # .01 - risk free rate of interest
+        # 100 - initial underlying asset price
+        # 0 - underlying asset drift (mu)
+        # .3 - underlying asset volatility
+        # 1/52 - time steps (dt)
+        # 1 - time to maturity (annum)
+        # .5 - extension if out of the money at expiration
+        extendible_call = MonteCarloExtendibleCall(100, 1000, .01, 100, 0, .3, 1/52, 1, .5)
+        extendible_put = MonteCarloExtendiblePut(100, 1000, .01, 100, 0, .3, 1/52, 1, .5)
+        ```
+        
+        ```Python
+        print(extendible_call.price)
+        print(extendible_put.price)
+        ```
+        
+        ```
+        13.60274931789973
+        13.20330578685724
+        ```
+        
+Keywords: python,finance
+Platform: UNKNOWN
+Classifier: Development Status :: 1 - Planning
+Classifier: Intended Audience :: Developers
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: Unix
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Operating System :: Microsoft :: Windows
+Description-Content-Type: text/markdown

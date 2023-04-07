@@ -7,9 +7,74 @@ https://pypi.org/project/QFin/
 pip install qfin
 ```
 
-# Bond Pricing
+# Version '0.1.20'
+QFin is being reconstructed to leverage more principals of object-oriented programming.  Several modules in this version are deprecated along with the solutions to PDEs/SDEs (mainly in the options module).
 
-# Option Pricing
+QFin now contains a module called 'stochastics' which will be largely responsible for model calibration and option pricing.  A Cython/C++ equivalent to QFin is also being constructed so stay tuned! 
+
+# Option Pricing <i>(>= 0.1.20)</i>
+
+Stochastic differential equations that model underlying asset dynamics extend the 'StochasticModel' class and posses a list of model parameters and functions for pricing vanillas, calibrating to implied volatility surfaces, and Monte Carlo simulations (particularly useful after calibration for pricing path dependent options).
+
+Below is a trivial example using ArithmeticBrownianMotion - first import the StochasticModel...
+```Python
+from qfin.stochastics import ArithmeticBrownianMotion
+```
+Next initialize the class object by parameterizing the model...
+```Python
+# abm parameterized by Bachelier vol = .3
+abm = ArithmeticBrownianMotion([.3])
+```
+The abm may now be used to price a vanilla call/put option (prices default to "CALL") under the given parameter set...
+```Python
+# F0 = 101
+# X = 100
+# T = 1
+abm.vanilla_pricing(101, 100, 1, "CALL")
+# Call Price: 1.0000336233656906
+```
+Using call-put parity put prices may also be obtained...
+```Python
+# F0 = 99
+# X = 100
+# T = 1
+abm.vanilla_pricing(99, 100, 1, "PUT")
+# Put Price: 1.0000336233656952
+```
+Calibration and subsequent simulation of the process is also available - do note that some processes have a static volatility and can't be calibrated to an ivol surface.
+
+The arithmetic Brownian motion may be simulated as follows...
+
+```Python
+# F0 = 100
+# n (steps) = 10000
+# dt = 1/252
+# T = 1
+abm.simulate(100, 10000, 1/252, 1)
+```
+Results of the simulation along with the simulation characteristics are stored under the tuple 'path_characteristics' : (paths, n, dt, T).  
+
+Using the stored path characteristics we may find the price of a call just as before by averaging each discounted path payoff (assuming a stock process) with zero-rates we can avoid discounting as follows and find the option value as follows...
+
+```Python
+# list of path payoffs
+payoffs = []
+# option strike price
+X = 99
+
+# iteration through terminal path values to identify payoff
+for path in abm.path_characteristics[0]:
+    # appending CALL payoff
+    payoffs.append(max((path[-1] - X), 0))
+
+# option value today
+np.average(payoffs)
+
+# Call Price:  1.0008974837343871
+```
+We can see here that the simulated price is converging to the price in close-form.
+
+# Option Pricing <i>(deprecated <= 0.0.20) </i>
 
 ### <a href="https://medium.com/swlh/deriving-the-black-scholes-model-5e518c65d0bc"> Black-Scholes Pricing</a>
 Theoretical options pricing for non-dividend paying stocks is available via the BlackScholesCall and BlackScholesPut classes.
@@ -276,6 +341,3 @@ print(extendible_put.price)
 13.60274931789973
 13.20330578685724
 ```
-
-
-# Futures Pricing
