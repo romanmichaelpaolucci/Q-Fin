@@ -174,36 +174,34 @@ class MonteCarloBinaryPut:
 
 
 class MonteCarloBarrierCall:
-
+    
     def simulate_price_gbm(self, strike, n, barrier, up, out, r, S, mu, sigma, dt, T):
         payouts = []
         for i in range(0, n):
-            payouts = []
-            for i in range(0, n):
-                barrier_triggered = False
-                GBM = GeometricBrownianMotion(S, mu, sigma, dt, T)
-                for price in GBM.simulated_path:
-                    if up:
-                        if(price >= barrier):
-                            barrier_triggered = True
-                            break
-                    elif not up:
-                        if(price <= barrier):
-                            barrier_triggered = True
-                            break
-                if out and not barrier_triggered:
-                    if GBM.simulated_path[-1] >= strike:
-                        payouts.append((GBM.simulated_path[-1]-strike)*np.exp(-r*T))
-                    else:
-                        payouts.append(0)
-                elif not out and barrier_triggered:
-                    if GBM.simulated_path[-1] >= strike:
-                        payouts.append((GBM.simulated_path[-1]-strike)*np.exp(-r*T))
-                    else:
-                        payouts.append(0)
+            barrier_triggered = False
+            GBM = GeometricBrownianMotion(S, mu, sigma, dt, T)
+            for price in GBM.simulated_path:
+                if up:
+                    if(price >= barrier):
+                        barrier_triggered = True
+                        break
+                elif not up:
+                    if(price <= barrier):
+                        barrier_triggered = True
+                        break
+            if out and not barrier_triggered:
+                if GBM.simulated_path[-1] >= strike:
+                    payouts.append((GBM.simulated_path[-1]-strike)*np.exp(-r*T))
                 else:
                     payouts.append(0)
-            return np.average(payouts)
+            elif not out and barrier_triggered:
+                if GBM.simulated_path[-1] >= strike:
+                    payouts.append((GBM.simulated_path[-1]-strike)*np.exp(-r*T))
+                else:
+                    payouts.append(0)
+            else:
+                payouts.append(0)
+        return np.average(payouts)
 
     def simulate_price_svm(self, strike, n, barrier, up, out, S, mu, r, div, alpha, beta, rho, vol_var, inst_var, dt, T):
         payouts = []
@@ -246,32 +244,30 @@ class MonteCarloBarrierPut:
     def simulate_price_gbm(self, strike, n, barrier, up, out, r, S, mu, sigma, dt, T):
         payouts = []
         for i in range(0, n):
-            payouts = []
-            for i in range(0, n):
-                barrier_triggered = False
-                GBM = GeometricBrownianMotion(S, mu, sigma, dt, T)
-                for price in GBM.simulated_path:
-                    if up:
-                        if(price >= barrier):
-                            barrier_triggered = True
-                            break
-                    elif not up:
-                        if(price <= barrier):
-                            barrier_triggered = True
-                            break
-                if out and not barrier_triggered:
-                    if GBM.simulated_path[-1] <= strike:
-                        payouts.append((strike - GBM.simulated_path[-1])*np.exp(-r*T))
-                    else:
-                        payouts.append(0)
-                elif not out and barrier_triggered:
-                    if GBM.simulated_path[-1] <= strike:
-                        payouts.append((strike - GBM.simulated_path[-1])*np.exp(-r*T))
-                    else:
-                        payouts.append(0)
+            barrier_triggered = False
+            GBM = GeometricBrownianMotion(S, mu, sigma, dt, T)
+            for price in GBM.simulated_path:
+                if up:
+                    if(price >= barrier):
+                        barrier_triggered = True
+                        break
+                elif not up:
+                    if(price <= barrier):
+                        barrier_triggered = True
+                        break
+            if out and not barrier_triggered:
+                if GBM.simulated_path[-1] <= strike:
+                    payouts.append((strike - GBM.simulated_path[-1])*np.exp(-r*T))
                 else:
                     payouts.append(0)
-            return np.average(payouts)
+            elif not out and barrier_triggered:
+                if GBM.simulated_path[-1] <= strike:
+                    payouts.append((strike - GBM.simulated_path[-1])*np.exp(-r*T))
+                else:
+                    payouts.append(0)
+            else:
+                payouts.append(0)
+        return np.average(payouts)
 
     def simulate_price_svm(self, strike, n, barrier, up, out, S, mu, r, div, alpha, beta, rho, vol_var, inst_var, dt, T):
         payouts = []
